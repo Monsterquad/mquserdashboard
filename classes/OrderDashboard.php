@@ -20,7 +20,21 @@ class OrderDashboard
      */
     public function getCustomerOrders($limit = null, $offset = 0)
     {
-        $orders = Order::getCustomerOrders($this->customerId);
+        // Construction de la requête SQL pour la pagination
+        $sql = 'SELECT o.*, osl.name as order_state_name, c.iso_code as currency_iso_code
+                FROM ' . _DB_PREFIX_ . 'orders o
+                LEFT JOIN ' . _DB_PREFIX_ . 'order_state_lang osl 
+                    ON (o.current_state = osl.id_order_state AND osl.id_lang = ' . (int)$this->context->language->id . ')
+                LEFT JOIN ' . _DB_PREFIX_ . 'currency c ON (o.id_currency = c.id_currency)
+                WHERE o.id_customer = ' . (int)$this->customerId . '
+                AND o.valid = 1
+                ORDER BY o.date_add DESC';
+
+        if ($limit !== null) {
+            $sql .= ' LIMIT ' . (int)$limit . ' OFFSET ' . (int)$offset;
+        }
+
+        $orders = Db::getInstance()->executeS($sql);
         $formattedOrders = [];
 
         foreach ($orders as $order) {
@@ -36,7 +50,7 @@ class OrderDashboard
                 'total_paid_value' => $order['total_paid'],
                 'status' => [
                     'id' => $order['current_state'],
-                    'name' => $this->getOrderStateName($order['current_state']),
+                    'name' => $order['order_state_name'],
                     'color' => $this->getOrderStateColor($order['current_state'])
                 ],
                 'invoice_number' => $order['invoice_number'],
@@ -46,13 +60,8 @@ class OrderDashboard
                     'id' => $carrier->id,
                     'name' => $carrier->name
                 ],
-                'products' => $this->getOrderProducts($order['id_order']),
                 'tracking_number' => $this->getTrackingNumber($order['id_order'])
             ];
-        }
-
-        if ($limit) {
-            return array_slice($formattedOrders, $offset, $limit);
         }
 
         return $formattedOrders;

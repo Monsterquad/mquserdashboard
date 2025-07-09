@@ -64,12 +64,25 @@ class MquserdashboardAjaxModuleFrontController extends ModuleFrontController
     {
         require_once(_PS_MODULE_DIR_ . 'mquserdashboard/classes/OrderDashboard.php');
 
+        $page = (int)Tools::getValue('page', 1);
+        $limit = (int)Tools::getValue('limit', 10);
+        $offset = ($page - 1) * $limit;
+
         $orderDashboard = new OrderDashboard($this->context->customer->id);
-        $orders = $orderDashboard->getCustomerOrders();
+        $orders = $orderDashboard->getCustomerOrders($limit, $offset);
+        $totalOrders = $orderDashboard->getTotalOrders();
 
         $this->ajaxDie(json_encode([
             'success' => true,
-            'data' => $orders
+            'data' => [
+                'orders' => $orders,
+                'pagination' => [
+                    'total' => $totalOrders,
+                    'page' => $page,
+                    'limit' => $limit,
+                    'pages' => ceil($totalOrders / $limit)
+                ]
+            ]
         ]));
     }
 
@@ -84,11 +97,22 @@ class MquserdashboardAjaxModuleFrontController extends ModuleFrontController
         $customerDashboard = new CustomerDashboard($this->context->customer->id);
         $orderDashboard = new OrderDashboard($this->context->customer->id);
 
+        $recentOrders = $orderDashboard->getCustomerOrders(5, 0);
+        $totalOrders = $orderDashboard->getTotalOrders();
+
         $data = [
             'customer' => $customerDashboard->getCustomerData(),
-            'orders' => $orderDashboard->getCustomerOrders(),
+            'orders' => [
+                'orders' => $recentOrders,
+                'pagination' => [
+                    'total' => $totalOrders,
+                    'page' => 1,
+                    'limit' => 5,
+                    'pages' => ceil($totalOrders / 5)
+                ]
+            ],
             'stats' => [
-                'total_orders' => $orderDashboard->getTotalOrders(),
+                'total_orders' => $totalOrders,
                 'total_spent' => $orderDashboard->getTotalSpent(),
                 'last_order_date' => $orderDashboard->getLastOrderDate()
             ]

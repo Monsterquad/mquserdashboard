@@ -81,18 +81,32 @@ class DashboardManager {
                 break;
 
             case 'orders':
-                if (!this.cache.orders) {
-                    const data = await this.fetchData('getOrders');
-                    if (data.success) {
-                        this.cache.orders = data.data;
-                        this.renderOrders(data.data);
-                    }
-                } else {
-                    this.renderOrders(this.cache.orders);
-                }
+                // Toujours recharger les commandes pour avoir la pagination complète
+                this.currentOrderPage = 1;
+                await this.loadOrders();
                 break;
 
             // Autres sections à implémenter...
+        }
+    }
+
+    /**
+     * Charge les commandes avec pagination
+     */
+    async loadOrders(page = 1) {
+        try {
+            const data = await this.fetchData('getOrders', {
+                page: page,
+                limit: this.ordersPerPage
+            });
+
+            if (data.success) {
+                this.currentOrderPage = page;
+                this.renderOrders(data.data.orders, data.data.pagination);
+            }
+        } catch (error) {
+            console.error('Erreur lors du chargement des commandes:', error);
+            this.showError('Impossible de charger les commandes');
         }
     }
 
@@ -248,7 +262,7 @@ class DashboardManager {
     /**
      * Affiche les commandes
      */
-    renderOrders(orders) {
+    renderOrders(orders, pagination = null) {
         const ordersSection = document.getElementById('orders-section');
         if (!ordersSection) return;
 
@@ -263,13 +277,127 @@ class DashboardManager {
         }
 
         const html = `
-            <h2 class="dashboard-title">Mes commandes</h2>
+            <h2 class="dashboard-title">Mes commandes ${pagination ? `(${pagination.total} au total)` : ''}</h2>
+            
+            ${pagination && pagination.total > pagination.limit ? `
+                <div class="orders-filter-bar">
+                    <div class="results-info">
+                        Affichage de ${((pagination.page - 1) * pagination.limit) + 1} à ${Math.min(pagination.page * pagination.limit, pagination.total)} sur ${pagination.total} commandes
+                    </div>
+                    <div class="items-per-page">
+                        <label>Commandes par page:</label>
+                        <select onchange="dashboardManager.changeOrdersPerPage(this.value)">
+                            <option value="5" ${this.ordersPerPage === 5 ? 'selected' : ''}>5</option>
+                            <option value="10" ${this.ordersPerPage === 10 ? 'selected' : ''}>10</option>
+                            <option value="20" ${this.ordersPerPage === 20 ? 'selected' : ''}>20</option>
+                            <option value="50" ${this.ordersPerPage === 50 ? 'selected' : ''}>50</option>
+                        </select>
+                    </div>
+                </div>
+            ` : ''}
+            
             <div class="orders-list">
                 ${orders.map(order => this.renderOrderCard(order)).join('')}
             </div>
+            
+            ${pagination && pagination.pages > 1 ? this.renderPagination(pagination) : ''}
         `;
 
         ordersSection.innerHTML = html;
+    }
+
+    /**
+     * Affiche la pagination
+     */
+    renderPagination(pagination) {
+        const { page, pages } = pagination;
+        let paginationHtml = '<div class="pagination-wrapper"><ul class="pagination">';
+
+        // Bouton précédent
+        paginationHtml += `
+            <li class="page-item ${page === 1 ? 'disabled' : ''}">
+                <a class="page-link" href="#" onclick="dashboardManager.goToOrderPage(${page - 1}); return false;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                </a>
+            </li>
+        `;
+
+        // Numéros de page avec ellipses
+        const maxVisible = 5;
+        let startPage = Math.max(1, page - Math.floor(maxVisible / 2));
+        let endPage = Math.min(pages, startPage + maxVisible - 1);
+
+        if (endPage - startPage + 1 < maxVisible) {
+            startPage = Math.max(1, endPage - maxVisible + 1);
+        }
+
+        // Première page si nécessaire
+        if (startPage > 1) {
+            paginationHtml += `
+                <li class="page-item">
+                    <a class="page-link" href="#" onclick="dashboardManager.goToOrderPage(1); return false;">1</a>
+                </li>
+            `;
+            if (startPage > 2) {
+                paginationHtml += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+            }
+        }
+
+        // Pages visibles
+        for (let i = startPage; i <= endPage; i++) {
+            paginationHtml += `
+                <li class="page-item ${i === page ? 'active' : ''}">
+                    <a class="page-link" href="#" onclick="dashboardManager.goToOrderPage(${i}); return false;">${i}</a>
+                </li>
+            `;
+        }
+
+        // Dernière page si nécessaire
+        if (endPage < pages) {
+            if (endPage < pages - 1) {
+                paginationHtml += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+            }
+            paginationHtml += `
+                <li class="page-item">
+                    <a class="page-link" href="#" onclick="dashboardManager.goToOrderPage(${pages}); return false;">${pages}</a>
+                </li>
+            `;
+        }
+
+        // Bouton suivant
+        paginationHtml += `
+            <li class="page-item ${page === pages ? 'disabled' : ''}">
+                <a class="page-link" href="#" onclick="dashboardManager.goToOrderPage(${page + 1}); return false;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </a>
+            </li>
+        `;
+
+        paginationHtml += '</ul></div>';
+        return paginationHtml;
+    }
+
+    /**
+     * Navigation vers une page de commandes
+     */
+    goToOrderPage(page) {
+        if (page < 1) return;
+        this.loadOrders(page);
+        // Scroll vers le haut de la section
+        document.getElementById('orders-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    /**
+     * Change le nombre de commandes par page
+     */
+    changeOrdersPerPage(value) {
+        this.ordersPerPage = parseInt(value);
+        this.currentOrderPage = 1;
+        this.loadOrders(1);
     }
 
     /**

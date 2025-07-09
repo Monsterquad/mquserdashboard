@@ -85,7 +85,8 @@
 
 .btn-secondary {
     padding: 8px 16px;
-    background: #6c757d;
+    border: 1px #0482DF;
+    background: #0482DF;
     color: white;
     border: none;
     border-radius: 6px;
@@ -95,7 +96,11 @@
 }
 
 .btn-secondary:hover {
-    background: #5a6268;
+    background: white;
+}
+
+span.detail-label {
+    font-weight: bold;
 }
 
 .btn-icon {
@@ -276,8 +281,13 @@
 
 .detail-item {
     display: flex;
-    justify-content: space-between;
+    /*justify-content: space-between;*/
     font-size: 14px;
+    gap: 10px;
+}
+
+span.detail-label {
+    min-width: fit-content;
 }
 
 .detail-label {
@@ -313,6 +323,7 @@
 
 .order-actions {
     display: flex;
+    flex-direction: row-reverse;
     gap: 10px;
     flex-wrap: wrap;
 }
