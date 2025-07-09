@@ -44,6 +44,31 @@ class MqUserDashboard extends Module
         return parent::uninstall();
     }
 
+    public function hookDisplayHeader($params)
+{
+    if ($this->context->controller->php_self == 'my-account' ||
+        Tools::getValue('controller') == 'dashboard') {
+
+        $this->context->controller->addCSS(
+            $this->_path . 'views/css/dashboard.css',
+            'all'
+        );
+
+        $this->context->controller->addJS(
+            $this->_path . 'views/js/dashboard.js'
+        );
+
+        Media::addJsDef([
+            'mqDashboardAjaxUrl' => $this->context->link->getModuleLink(
+                'mquserdashboard',
+                'ajax',
+                [],
+                true
+            )
+        ]);
+    }
+}
+
     public function hookHeader()
     {
         // Ajouter CSS et JS seulement sur les pages account

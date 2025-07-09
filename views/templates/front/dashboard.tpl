@@ -244,10 +244,10 @@
                     <i class="material-icons">receipt</i>
                     <span>Avoirs</span>
                 </a>
-
+kuhearbfouzerhbiuzebrfiuzevbrfigverfiubercoyuzeabcouzybervouba
                 <a href="{$urls.pages.addresses}" class="quick-action-card">
                     <i class="material-icons">location_on</i>
-                    <span>Adresses</span>
+                    <span>Adressaucbouazbecouebrvoueavrouaebrouayzeves</span>
                 </a>
 
                 <a href="{$urls.pages.identity}" class="quick-action-card">
