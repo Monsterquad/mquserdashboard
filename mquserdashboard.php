@@ -53,11 +53,6 @@ class MqUserDashboard extends Module
             $this->_path . 'views/css/dashboard.css',
             'all'
         );
-
-        $this->context->controller->addJS(
-            $this->_path . 'views/js/dashboard.js'
-        );
-
         Media::addJsDef([
             'mqDashboardAjaxUrl' => $this->context->link->getModuleLink(
                 'mquserdashboard',
@@ -82,8 +77,23 @@ class MqUserDashboard extends Module
             );
 
             $this->context->controller->registerJavascript(
-                'mquserdashboard-script',
-                'modules/' . $this->name . '/views/js/dashboard.js',
+                'mquserdashboard-main-script',
+                'modules/' . $this->name . '/views/js/main.js',
+                ['position' => 'bottom', 'priority' => 200]
+            );
+            $this->context->controller->registerJavascript(
+                'mquserdashboard-main-service-script',
+                'modules/' . $this->name . '/views/js/dashboard.service.js',
+                ['position' => 'bottom', 'priority' => 200]
+            );
+            $this->context->controller->registerJavascript(
+                'mquserdashboard-main-renderer-script',
+                'modules/' . $this->name . '/views/js/dashboard.renderer.js',
+                ['position' => 'bottom', 'priority' => 200]
+            );
+            $this->context->controller->registerJavascript(
+                'mquserdashboard-main-manager-script',
+                'modules/' . $this->name . '/views/js/dashboard.manager.js',
                 ['position' => 'bottom', 'priority' => 200]
             );
         }
