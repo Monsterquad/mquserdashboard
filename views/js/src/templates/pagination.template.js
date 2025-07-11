@@ -1,12 +1,8 @@
-class Pagination {
-
-    constructor() {
-    }
 
     /**
      * Affiche la pagination
      */
-    static renderPagination(pagination) {
+    export const paginationTemplate = (pagination) => {
         const { page, pages } = pagination;
         let paginationHtml = '<div class="pagination-wrapper"><ul class="pagination">';
 
@@ -77,6 +73,3 @@ class Pagination {
         paginationHtml += '</ul></div>';
         return paginationHtml;
     }
-}
-
-export default Pagination;

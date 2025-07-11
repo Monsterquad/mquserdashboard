@@ -1,7 +1,7 @@
 import path from 'path';
 
 export default {
-  entry: './src/main.js',
+  entry: './src/app.js',
   output: {
     filename: 'bundle.js',
     path: path.resolve('dist'),

@@ -1,11 +1,11 @@
-
-class Fetcher {
+export default class Api {
 
     constructor() {
+
     }
 
     /**
-     * Effectue une requête AJAX
+     * Effectue une requête AJAX sur le controller back
      */
     static async fetchData(action, params = {}) {
         const formData = new FormData();
@@ -37,5 +37,3 @@ class Fetcher {
         }
     }
 }
-
-export default Fetcher;

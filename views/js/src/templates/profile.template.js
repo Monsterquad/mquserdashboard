@@ -1,15 +1,9 @@
-import {formatDate} from '../utils/date.js';
+import {formatDate} from "../utils/date.js";
+import { rendererAdressProfilView } from "./profile.renderAdress.template.js";
 
+export const ProfilTemplate = (customer) => {
 
-/**
- * return les information profile
- */
-export function renderProfil(customer){
-    const profileSection = document.getElementById('profile-section');
-    if (!profileSection) return;
-
-    const html = `
-        <h2 class="dashboard-title">Mon profil</h2>
+    return `<h2 class="dashboard-title">Mon profil</h2>
         
         <div class="profile-grid">
             <!-- Informations personnelles -->
@@ -53,11 +47,8 @@ export function renderProfil(customer){
             <!-- Adresses -->
             <div class="profile-card">
                 <h3 class="profile-card-title">Mes adresses</h3>
-                ${renderAddresses(customer.addresses)}
-                <button class="btn-edit" 
-                    data-customer='${JSON.stringify(customer).replace(/'/g, "&apos;")}' 
-                    onclick="renderAddressModifViews(JSON.parse(this.dataset.customer).addresses)">
-                >
+                ${rendererAdressProfilView(customer.addresses)}
+                <button class="btn-edit">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
@@ -97,8 +88,4 @@ export function renderProfil(customer){
             </div>
         </div>
     `;
-    profileSection.innerHTML = html;
 }
-
-window.renderProfil = renderProfil
-
