@@ -36,6 +36,7 @@ class MqUserDashboard extends Module
         return parent::install() &&
         $this->registerHook('displayOverrideTemplate') &&
             $this->registerHook('header') &&
+            $this->registerHook('displayFooter') &&
             $this->registerHook('actionFrontControllerSetMedia');
     }
 
@@ -44,58 +45,25 @@ class MqUserDashboard extends Module
         return parent::uninstall();
     }
 
-    public function hookDisplayHeader($params)
-{
-    if ($this->context->controller->php_self == 'my-account' ||
-        Tools::getValue('controller') == 'dashboard') {
-
-        $this->context->controller->addCSS(
-            $this->_path . 'views/css/dashboard.css',
-            'all'
-        );
-        Media::addJsDef([
-            'mqDashboardAjaxUrl' => $this->context->link->getModuleLink(
-                'mquserdashboard',
-                'ajax',
-                [],
-                true
-            )
-        ]);
-    }
-}
-
     public function hookHeader()
     {
-        // Ajouter CSS et JS seulement sur les pages account
         if ($this->context->controller instanceof CustomerController ||
             $this->context->controller instanceof MyAccountController) {
 
             $this->context->controller->registerStylesheet(
                 'mquserdashboard-style',
-                'modules/' . $this->name . '/views/css/dashboard.css',
+                'modules/' . $this->name . '/views/js/dist/bundle.css',
                 ['media' => 'all', 'priority' => 200]
             );
+        }
+    }
 
-            $this->context->controller->registerJavascript(
-                'mquserdashboard-main-script',
-                'modules/' . $this->name . '/views/js/main.js',
-                ['position' => 'bottom', 'priority' => 200]
-            );
-            $this->context->controller->registerJavascript(
-                'mquserdashboard-main-service-script',
-                'modules/' . $this->name . '/views/js/dashboard.service.js',
-                ['position' => 'bottom', 'priority' => 200]
-            );
-            $this->context->controller->registerJavascript(
-                'mquserdashboard-main-renderer-script',
-                'modules/' . $this->name . '/views/js/dashboard.renderer.js',
-                ['position' => 'bottom', 'priority' => 200]
-            );
-            $this->context->controller->registerJavascript(
-                'mquserdashboard-main-manager-script',
-                'modules/' . $this->name . '/views/js/dashboard.manager.js',
-                ['position' => 'bottom', 'priority' => 200]
-            );
+    public function hookDisplayFooter()
+    {
+        if ($this->context->controller instanceof CustomerController ||
+            $this->context->controller instanceof MyAccountController) {
+
+            return '<script src="' . $this->getPathUri() . 'views/js/dist/bundle.js" defer></script>';
         }
     }
 

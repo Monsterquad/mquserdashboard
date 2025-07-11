@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<module>
+    <name>mquserdashboard</name>
+    <displayName><![CDATA[MQ Dashboard Utilisateur]]></displayName>
+    <version><![CDATA[1.0.0]]></version>
+    <description><![CDATA[Dashboard moderne et condens&eacute; pour les utilisateurs avec toutes les informations importantes]]></description>
+    <author><![CDATA[MonsterQuad]]></author>
+    <tab><![CDATA[front_office_features]]></tab>
+	<confirmUninstall><![CDATA[Êtes-vous sûr de vouloir désinstaller ce module ?]]></confirmUninstall>
+    <is_configurable>1</is_configurable>
+    <need_instance>0</need_instance>
+</module>
