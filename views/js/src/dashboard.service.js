@@ -1,13 +1,10 @@
-/**
- * Service pour la gestion des données du dashboard
- * Path: modules/mquserdashboard/views/js/dashboard.service.js
- */
+import Fetcher from './utils/fetcher.js';
+import Profile from './profile/profile.js';
 
 class DashboardService {
     constructor() {
-        this.profil = new Profil();
+        this.profil = new Profile();
     }
-
     /**
      * Charge les données initiales du dashboard
      */
@@ -15,7 +12,6 @@ class DashboardService {
         try {
             const response = await Fetcher.fetchData('getDashboardData');
             if (response.success) {
-                this.cache = response.data;
                 return response.data;
             }
             throw new Error('Données non valides');
@@ -55,3 +51,5 @@ class DashboardService {
         }
     }
 }
+
+export default DashboardService;

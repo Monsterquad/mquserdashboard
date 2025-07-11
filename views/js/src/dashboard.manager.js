@@ -1,7 +1,9 @@
-/**
- * Gestionnaire principal du dashboard
- * Path: modules/mquserdashboard/views/js/dashboard.manager.js
- */
+import DashboardService from './dashboard.service.js';
+import DashboardRenderer from './dashboard.renderer.js';
+import Error from './utils/error.js';
+import OrderRenderer from './commandes/order.renderer.js'
+import Profil from "./profile/profile.js";
+import {ProfileRenderer, renderProfil} from "./profile/profile.renderer.js";
 
 class DashboardManager {
     constructor() {
@@ -17,6 +19,7 @@ class DashboardManager {
         this.customerData = null;
 
         this.init();
+        this.profile = new Profil();
     }
 
     /**
@@ -64,7 +67,7 @@ class DashboardManager {
             const data = await this.service.loadInitialData();
             
             // Rendu des données initiales
-            this.renderer.renderProfile(data.customer);
+            // this.renderer.renderProfile(data.customer);
             //this.renderer.renderOrders(data.orders);
             
             // Affichage de la section active
@@ -72,7 +75,7 @@ class DashboardManager {
             
         } catch (error) {
             console.error('Erreur lors du chargement des données:', error);
-            this.renderer.showError('Impossible de charger les données du dashboard');
+            Error.showError('Impossible de charger les données du dashboard');
         }
     }
 
@@ -99,7 +102,7 @@ class DashboardManager {
             }
         } catch (error) {
             console.error(`Erreur lors du chargement de la section ${section}:`, error);
-            this.renderer.showError(`Impossible de charger les données de la section ${section}`);
+            Error.showError(`Impossible de charger les données de la section ${section}`);
         }
     }
 
@@ -108,11 +111,11 @@ class DashboardManager {
      */
     async loadProfileData() {
         try {
-            this.customerData = await this.service.getCustomerInfo();
-            this.renderer.renderProfile(this.customerData);
+            this.customerData = await this.profile.customerInfo();
+            renderProfil(this.customerData);
         } catch (error) {
             console.error('Erreur lors du chargement du profil:', error);
-            this.renderer.showError('Impossible de charger les informations du profil');
+            Error.showError('Impossible de charger les informations du profil');
         }
     }
 
@@ -123,10 +126,10 @@ class DashboardManager {
         try {
             this.currentOrderPage = page;
             const ordersData = await this.service.getOrders(page, this.ordersPerPage);
-            this.renderer.renderOrders(ordersData.orders, ordersData.pagination, this.ordersPerPage);
+            OrderRenderer.renderOrders(ordersData.orders, ordersData.pagination, this.ordersPerPage);
         } catch (error) {
             console.error('Erreur lors du chargement des commandes:', error);
-            this.renderer.showError('Impossible de charger les commandes');
+            Error.showError('Impossible de charger les commandes');
         }
     }
 
@@ -189,10 +192,6 @@ class DashboardManager {
         this.renderer.showSuccess('Dashboard rafraîchi avec succès');
     }
 
-    /*
-     * Fonction pour éffacer le contenue et le remplacer
-     */
-
     /**
      * Éditer le profil
      */
@@ -205,19 +204,6 @@ class DashboardManager {
      */
     editAddress(){
         this.renderer.renderModifAddress(this.customerData.addresses)
-    }
-    /**
-     * Voir les détails d'une commande
-     */
-    viewOrderDetails(orderId) {
-        window.location.href = this.baseUrl + 'index.php?controller=order-detail&id_order=' + orderId;
-    }
-
-    /**
-     * Télécharger une facture
-     */
-    downloadInvoice(orderId) {
-        window.location.href = this.baseUrl + 'index.php?controller=pdf-invoice&id_order=' + orderId;
     }
 
     /**
@@ -284,21 +270,4 @@ class DashboardManager {
     }
 }
 
-// Initialisation au chargement de la page
-let dashboardManager;
-
-document.addEventListener('DOMContentLoaded', function() {
-    // Vérifier que les dépendances sont chargées
-    if (typeof DashboardService === 'undefined') {
-        console.error('DashboardService n\'est pas chargé');
-        return;
-    }
-    
-    if (typeof DashboardRenderer === 'undefined') {
-        console.error('DashboardRenderer n\'est pas chargé');
-        return;
-    }
-    
-    // Initialiser le gestionnaire principal
-    dashboardManager = new DashboardManager();
-});
+export default DashboardManager;

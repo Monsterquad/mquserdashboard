@@ -1,6 +1,4 @@
 
-
-
 class Fetcher {
 
     constructor() {
@@ -39,3 +37,5 @@ class Fetcher {
         }
     }
 }
+
+export default Fetcher;

@@ -1,0 +1,4 @@
+class Avoirs {
+    constructor() {
+    }
+}

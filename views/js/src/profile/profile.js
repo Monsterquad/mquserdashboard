@@ -1,3 +1,5 @@
+import Fetcher from "../utils/fetcher.js";
+import {renderAddressModifViews} from "./address.renderer.js";
 class Profil {
 
     constructor() {
@@ -17,4 +19,12 @@ class Profil {
             throw error;
         }
     }
+
+    static renderAdressModifView(addresses){
+        return renderAddressModifViews(addresses);
+    }
 }
+
+
+window.Profil = Profil
+export default Profil;
