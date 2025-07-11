@@ -1,5 +1,3 @@
-import Log from './utils/log.js';
-import Api from './services/api.js';
 import Profil from "./components/profile.js";
 import Order from "./components/order.js";
 
@@ -72,7 +70,7 @@ class Routeur {
                     break;
             }
         } catch (error) {
-            log.error(`Impossible de charger ${section}`);
+            Log.error(`Impossible de charger ${section}`);
         }
     }
 
@@ -85,9 +83,27 @@ class Routeur {
     }
 
     async loadOrders(){
-        const [orders, pagination] = await Order.getOrders();
-        if (orders && pagination){
-           Order.renderOrders(orders, pagination)
+        try {
+            const [orders, pagination] = await Order.getOrders(
+                this.currentOrderPage,
+                this.ordersPerPage
+            );
+
+            if (orders && pagination){
+                Order.renderOrders(orders, pagination, this.ordersPerPage);
+            }
+        } catch (error) {
+            Log.error('Erreur lors du chargement des commandes:', error);
+        }
+    }
+
+    async changeOrdersPerPage(newPerPage) {
+        try {
+            this.ordersPerPage = parseInt(newPerPage);
+            this.currentOrderPage = 1;
+            await this.loadOrders();
+        } catch (error) {
+            Log.error('Erreur lors du changement du nombre de commandes par page:', error);
         }
     }
 }

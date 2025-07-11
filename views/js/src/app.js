@@ -1,5 +1,6 @@
 import Routeur from "./router.js";
 import Log from './utils/log.js';
+import Order from "./components/order.js";
 
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
@@ -8,6 +9,17 @@ if (document.readyState === 'loading') {
 }
 
 function init() {
+    setupGlobalFunctions()
+    window.Log = new Log();
     window.dashboardManager = new Routeur();
-    window.log = new Log();
+}
+
+function setupGlobalFunctions() {
+    window.viewOrderDetails = (orderId) => {
+        Order.viewOrderDetails(orderId);
+    };
+
+    window.downloadInvoice = (orderId) => {
+        Order.downloadInvoice(orderId);
+    };
 }

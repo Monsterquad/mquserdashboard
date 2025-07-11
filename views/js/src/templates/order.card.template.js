@@ -43,15 +43,15 @@ export const renderOrderCard = (order) => {
                 ` : ''}
 
                 <div class="order-actions">
-                    <button class="btn-secondary" onclick="Order.viewOrderDetails(${order.id})">
+                    <button class="btn-secondary" onclick="viewOrderDetails(${order.id})">
                         Voir le détail
                     </button>
                     ${order.invoice_number ? `
-                        <button class="btn-secondary" onclick="Order.downloadInvoice(${order.id})">
+                        <button class="btn-secondary" onclick="downloadInvoice(${order.id})">
                             Télécharger la facture
                         </button>
                     ` : ''}
                 </div>
             </div>
         `;
-    }
+}

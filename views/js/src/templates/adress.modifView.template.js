@@ -1,6 +1,6 @@
+import {renderAddressEditCard} from "./adress.editCard.template.js";
 
-
-export function renderAddressModifViews(addresses){
+export const renderAddressModifViews = (addresses) => {
     const profileSection = document.getElementById('profile-section');
     if (!profileSection){
         console.log('pas de section de profile')
