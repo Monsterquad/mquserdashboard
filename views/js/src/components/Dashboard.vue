@@ -6,11 +6,9 @@
       @section-changed="setActiveSection"
     />
 
-    <DashboardContent />
-
-    <div style="position: fixed; top: 10px; right: 10px; background: red; color: white; padding: 10px;">
-      Section: {{ activeSection }}
-    </div>
+    <DashboardContent
+      :section-active="activeSection"
+    />
 
   </div>
 </template>
@@ -70,17 +68,10 @@ export default {
     }
   },
 
-  mounted() {
-    console.log('🚀 Dashboard monté!')
-    console.log('📍 Section initiale:', this.activeSection)
-  },
-
   methods: {
     setActiveSection(section) {
       this.activeSection = section
-      console.log('🎯 SECTION CHANGÉE:', section)
-      console.warn('⚠️ Test warning:', section)
-      console.error('❌ Test error:', section)
+      console.log(this.activeSection)
     }
   }
 }
