@@ -4,6 +4,8 @@
  * Path: modules/mquserdashboard/controllers/front/ajax.php
  */
 
+
+require_once _PS_MODULE_DIR_ . 'mquserdashboard/classes/CustomerSupportManager.php';
 class MquserdashboardAjaxModuleFrontController extends ModuleFrontController
 {
     public function init()
@@ -59,6 +61,18 @@ class MquserdashboardAjaxModuleFrontController extends ModuleFrontController
                     break;
                 case 'addCustomerReview':
                     $this->addCustomerReview();
+                    break;
+                case 'getCustomerThreads':
+                    $this->getCustomerThreads();
+                    break;
+                case 'getThreadMessages':
+                    $this->getThreadMessages();
+                    break;
+                case 'addThreadMessage':
+                    $this->addMessageToThread();
+                    break;
+                case 'createNewThread':
+                    $this->createNewThread();
                     break;
                 default:
                     die(json_encode([
@@ -599,6 +613,51 @@ class MquserdashboardAjaxModuleFrontController extends ModuleFrontController
         ]));
     }
 }
+
+    private function getCustomerThreads()
+    {
+        $support = new CustomerSupportManager($this->context);
+        $result = $support->getCustomerThreads();
+        die(json_encode($result));
+    }
+
+    private function getThreadMessages()
+    {
+        $support = new CustomerSupportManager($this->context);
+        $threadId = Tools::getValue('thread_id');
+        $result = $support->getThreadMessages($threadId);
+        die(json_encode($result));
+    }
+
+    private function addMessageToThread()
+    {
+        $support = new CustomerSupportManager($this->context);
+        $threadId = Tools::getValue('thread_id');
+        $message = Tools::getValue('message');
+        $result = $support->addMessageToThread($threadId, $message);
+        die(json_encode($result));
+    }
+
+    private function createNewThread()
+    {
+        $support = new CustomerSupportManager($this->context);
+        $result = $support->createNewThread(
+            Tools::getValue('subject'),
+            Tools::getValue('message'),
+            Tools::getValue('order_id', 0),
+            Tools::getValue('contact_id', 1)
+        );
+        die(json_encode($result));
+    }
+
+    private function getCustomerOrders()
+    {
+        $support = new CustomerSupportManager($this->context);
+        $result = $support->getCustomerOrders();
+        die(json_encode($result));
+    }
+
+
 
     /**
      * Override pour éviter l'affichage du template

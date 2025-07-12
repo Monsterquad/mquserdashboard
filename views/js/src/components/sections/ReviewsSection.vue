@@ -264,7 +264,6 @@ export default {
   },
 
   methods: {
-    // Charger toutes les données (avis + commandes)
     async loadData() {
       this.loadingData = true
       this.dataError = null
@@ -278,8 +277,7 @@ export default {
         // Récupérer les commandes récentes depuis orders_data
         this.recentOrders = data.data.orders_data || []
 
-        console.log('✅ Avis chargés:', this.myReviews)
-        console.log('✅ Commandes récentes chargées:', this.recentOrders)
+        console.log(data)
       } catch (error) {
         this.dataError = error.message
         console.error('❌ Erreur chargement données:', error)

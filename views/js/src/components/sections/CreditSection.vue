@@ -182,22 +182,18 @@ export default {
       }
     },
 
-    // Vérifier si le bon est mis en avant
     isHighlighted(voucher) {
       return voucher.highlight === '1';
     },
 
-    // Vérifier si le bon est personnel
     isPersonal(voucher) {
       return voucher.id_customer !== '0';
     },
 
-    // Vérifier si le bon a un cadeau
     hasGift(voucher) {
       return voucher.gift_product !== '0';
     },
 
-    // Calculer les utilisations restantes
     getRemainingUses(voucher) {
       const perUser = parseInt(voucher.quantity_per_user);
       const total = parseInt(voucher.quantity);
