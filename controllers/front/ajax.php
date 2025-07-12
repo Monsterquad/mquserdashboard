@@ -50,11 +50,8 @@ class MquserdashboardAjaxModuleFrontController extends ModuleFrontController
                     $this->getOrders();
                     break;
                 // pour les bons de réductions et avoirs
-                case 'getCustomerVouchers':
-                    $this->getCustomerVouchers();
-                    break;
                 case 'getCustomerCredits':
-                    $this->getCustomerCredits();
+                    $this->getCustomerVouchers();
                     break;
                 // pour les avis
                 case 'getCustomerReviews':
@@ -353,81 +350,7 @@ class MquserdashboardAjaxModuleFrontController extends ModuleFrontController
        }
     }
 
-    /**
-    * Récupère les bons de réduction du client
-    */
-    private function getCustomerVouchers()
-    {
-       try {
-           $customerId = $this->context->customer->id;
 
-           $sql = 'SELECT cr.*, crl.name, crl.description
-                   FROM ' . _DB_PREFIX_ . 'cart_rule cr
-                   LEFT JOIN ' . _DB_PREFIX_ . 'cart_rule_lang crl ON (cr.id_cart_rule = crl.id_cart_rule AND crl.id_lang = ' . (int)$this->context->language->id . ')
-                   WHERE cr.id_customer = ' . (int)$customerId . '
-                   AND cr.active = 1
-                   AND (cr.quantity > 0 OR cr.quantity = 0)
-                   ORDER BY cr.date_add DESC';
-
-           $vouchers = Db::getInstance()->executeS($sql);
-
-           // Formater les données
-           $formattedVouchers = [];
-           foreach ($vouchers as $voucher) {
-               $formattedVouchers[] = [
-                   'id' => $voucher['id_cart_rule'],
-                   'code' => $voucher['code'],
-                   'name' => $voucher['name'],
-                   'description' => $voucher['description'],
-                   'reduction_amount' => $voucher['reduction_amount'],
-                   'reduction_percent' => $voucher['reduction_percent'],
-                   'date_from' => $voucher['date_from'],
-                   'date_to' => $voucher['date_to'],
-                   'quantity' => $voucher['quantity'],
-                   'quantity_per_user' => $voucher['quantity_per_user']
-               ];
-           }
-
-           die(json_encode([
-               'success' => true,
-               'data' => $formattedVouchers
-           ]));
-       } catch (Exception $e) {
-           die(json_encode([
-               'success' => false,
-               'message' => 'Erreur lors de la récupération des bons: ' . $e->getMessage()
-           ]));
-       }
-    }
-
-    /**
-    * Récupère les avoirs du client
-    */
-    private function getCustomerCredits()
-    {
-       try {
-           $customerId = $this->context->customer->id;
-
-           $sql = 'SELECT cs.*, o.reference as order_reference
-                   FROM ' . _DB_PREFIX_ . 'customer_credit cs
-                   LEFT JOIN ' . _DB_PREFIX_ . 'orders o ON cs.id_order = o.id_order
-                   WHERE cs.id_customer = ' . (int)$customerId . '
-                   AND cs.amount > 0
-                   ORDER BY cs.date_add DESC';
-
-           $credits = Db::getInstance()->executeS($sql);
-
-           die(json_encode([
-               'success' => true,
-               'data' => $credits ?: []
-           ]));
-       } catch (Exception $e) {
-           die(json_encode([
-               'success' => false,
-               'message' => 'Erreur lors de la récupération des avoirs: ' . $e->getMessage()
-           ]));
-       }
-    }
 
     /**
     * Récupère les avis du client
@@ -596,6 +519,86 @@ class MquserdashboardAjaxModuleFrontController extends ModuleFrontController
             return [];
         }
     }
+
+    private function getCustomerVouchers()
+{
+    try {
+        $customerId = (int)$this->context->customer->id;
+        $languageId = (int)$this->context->language->id;
+
+        if (!$customerId) {
+            throw new Exception('Client non connecté');
+        }
+                // avec utilisation des bon génériques TODO -> vérifier avec papa pour ca
+
+                /*$sql = "
+                        SELECT 
+                            cr.id_cart_rule,
+                            cr.description,
+                            cr.code,
+                            cr.reduction_amount,
+                            cr.reduction_percent,
+                            cr.active,
+                            cr.id_customer,
+                            cr.highlight
+                        FROM " . _DB_PREFIX_ . "cart_rule cr
+                        WHERE cr.active = 1
+                            AND cr.date_from <= NOW()
+                            AND (cr.date_to >= NOW() OR cr.date_to = '0000-00-00 00:00:00')
+                            AND cr.quantity > 0
+                            AND (
+                                -- Bons personnels (attribués au client)
+                                cr.id_customer = " . $customerId . "
+                                OR 
+                                -- Bons génériques avec code (utilisables par tous)
+                                (cr.id_customer = 0 AND cr.code IS NOT NULL AND cr.code != '')
+                            )
+                        ORDER BY cr.highlight DESC, cr.date_to ASC, cr.priority DESC
+                    ";*/
+
+            $sql = "
+                    SELECT 
+                       cr.id_cart_rule,
+                        cr.description,
+                        cr.code,
+                        cr.reduction_amount,
+                        cr.reduction_percent,
+                        cr.free_shipping,
+                        cr.date_from,
+                        cr.date_to,
+                        cr.minimum_amount,
+                        cr.quantity,
+                        cr.quantity_per_user,
+                        cr.priority,
+                        cr.active,
+                        cr.id_customer,
+                        cr.gift_product,
+                        cr.highlight
+                    FROM " . _DB_PREFIX_ . "cart_rule cr
+                    WHERE cr.active = 1
+                        AND cr.date_from <= NOW()
+                        AND (cr.date_to >= NOW() OR cr.date_to = '0000-00-00 00:00:00')
+                        AND cr.quantity > 0
+                        AND  cr.id_customer = " . $customerId . "
+                    ORDER BY cr.highlight DESC, cr.date_to ASC, cr.priority DESC
+                ";
+
+
+        $vouchers = Db::getInstance()->executeS($sql);
+
+        die(json_encode([
+            'success' => true,
+            'data' => $vouchers ?: [],
+            'count' => count($vouchers ?: [])
+        ]));
+
+    } catch (Exception $e) {
+        die(json_encode([
+            'success' => false,
+            'message' => 'Erreur: ' . $e->getMessage()
+        ]));
+    }
+}
 
     /**
      * Override pour éviter l'affichage du template

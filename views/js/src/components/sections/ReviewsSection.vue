@@ -60,7 +60,7 @@
               <div class="review-meta">
                 <span class="review-date">{{ formatDate(review.date) }}</span>
                 <span :class="['review-status', review.active ? 'published' : 'pending']">
-                  {{ review.active ? '✅ Publié' : '⏳ En attente' }}
+                  {{ review.active ? 'Publié' : '⏳ En attente' }}
                 </span>
               </div>
             </div>
